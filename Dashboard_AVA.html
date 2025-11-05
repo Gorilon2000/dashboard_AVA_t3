@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard - Análisis de Crisis (Bolón de Tere)</title>
+  <style>
+    :root{
+      --primary: #0D6CD9;
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --muted: #6b7280;
+      --glass: rgba(13,108,217,0.08);
+      --accent: #0b57b8;
+      --radius: 12px;
+      --shadow: 0 8px 22px rgba(16,24,40,0.08);
+      --mono: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: var(--mono);
+      background: linear-gradient(180deg, var(--bg), #eef4ff 120px);
+      color:#111827;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    header{
+      display:flex;
+      gap:16px;
+      align-items:center;
+      padding:22px 32px;
+    }
+    .brand {
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .logo {
+      width:54px;
+      height:54px;
+      border-radius:10px;
+      background:linear-gradient(135deg,var(--primary),var(--accent));
+      box-shadow: 0 6px 18px rgba(13,108,217,0.18);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:white;
+      font-weight:700;
+      font-size:18px;
+    }
+    h1{font-size:18px;margin:0}
+    p.lead{margin:2px 0 0;color:var(--muted);font-size:13px}
+
+    .container{
+      max-width:1200px;
+      margin:18px auto;
+      padding:0 20px 60px;
+      display:grid;
+      grid-template-columns: 1fr 520px;
+      gap:20px;
+    }
+
+    /* Left column: insights */
+    .left{
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:18px;
+      box-shadow:var(--shadow);
+    }
+    .card h2{
+      margin:0 0 12px 0;
+      font-size:16px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+    }
+    .topics-list{display:grid;gap:10px}
+    .topic{
+      border-left:4px solid var(--primary);
+      padding:10px 12px;
+      border-radius:8px;
+      background: linear-gradient(180deg, rgba(13,108,217,0.02), rgba(13,108,217,0.01));
+    }
+    .topic h3{margin:0;font-size:14px}
+    .topic p{margin:6px 0 0;color:var(--muted);font-size:13px}
+
+    /* Right column: visualizations */
+    .right{
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+
+    .heatmap{
+      width:100%;
+      overflow:auto;
+    }
+    .heatmap-grid{
+      display:grid;
+      grid-template-columns: repeat(24, 28px);
+      gap:6px;
+      align-items:center;
+    }
+    .heatmap-row{
+      display:flex;
+      gap:6px;
+      align-items:center;
+      margin-bottom:6px;
+    }
+    .day-label{
+      width:86px;
+      text-align:right;
+      margin-right:12px;
+      color:var(--muted);
+      font-size:13px;
+    }
+    .cell{
+      width:28px;height:28px;border-radius:6px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:10px;color:white;font-weight:600;
+      box-shadow: inset 0 -2px 6px rgba(0,0,0,0.06);
+    }
+
+    /* legend */
+    .legend{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+    .legend .swatch{width:36px;height:12px;border-radius:6px}
+
+    /* correlation */
+    .corr-grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:8px;
+      margin-top:8px;
+    }
+    .corr-item{
+      padding:10px;border-radius:8px;background:var(--glass);
+      font-size:13px;
+      color:#01243b;
+    }
+
+    /* top tweets */
+    .tweet{
+      display:flex;gap:12px;padding:12px;border-radius:10px;background:#fbfdff;border:1px solid rgba(13,108,217,0.04);
+    }
+    .tweet .meta{font-size:12px;color:var(--muted)}
+    .tweet .text{font-size:14px;margin-top:6px}
+
+    footer{
+      max-width:1200px;margin:20px auto 60px;padding:0 20px;color:var(--muted);font-size:13px;text-align:center;
+    }
+
+    /* Responsive */
+    @media (max-width:1024px){
+      .container{grid-template-columns: 1fr; padding-bottom:40px}
+      .day-label{display:none}
+    }
+
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">DT</div>
+      <div>
+        <h1>Dashboard: Crisis en Twitter — Cafè / Bolón</h1>
+        <p class="lead">Insights generados a partir del JSON de análisis (exploratorio, temporal y de texto).</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- LEFT: Topics & Summary -->
+    <section class="left">
+      <div class="card">
+        <h2>Resumen ejecutivo
+          <span style="font-size:12px;color:var(--muted)">Alto alcance – Priorizar pagos y consistencia</span>
+        </h2>
+        <p style="margin:8px 0 0;color:var(--muted);font-size:14px">
+          La conversación es polarizante: la marca genera fuertes defensores y críticos. Recomendaciones rápidas: (1) resolver medios de pago y delivery, (2) asegurar consistencia de producto, (3) comunicar valor e historias verificables. (Resumen extraído del JSON). :contentReference[oaicite:1]{index=1}
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>Temáticas encontradas</h2>
+        <div id="topics" class="topics-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>Correlaciones relevantes</h2>
+        <div class="corr-grid" id="corrGrid"></div>
+        <p style="margin-top:10px;color:var(--muted);font-size:13px">
+          Interpretación: correlación entre <strong>followers</strong> y <strong>favorites</strong> positiva (usuarios con más seguidores tienden a generar más likes). Datos numéricos: ver tabla.
+        </p>
+      </div>
+    </section>
+
+    <!-- RIGHT: Heatmap, Top tweets -->
+    <aside class="right">
+      <div class="card heatmap">
+        <h2>Mapa de calor — patrón temporal de likes</h2>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="legend">
+            <div style="font-weight:600;color:#0b3c6b">Intensidad</div>
+            <div style="display:flex;gap:6px;align-items:center;margin-left:10px">
+              <div class="swatch" style="background:linear-gradient(90deg, #e6f0ff, var(--primary));border-radius:6px"></div>
+              <div style="color:var(--muted);font-size:13px">Mayor likes</div>
+            </div>
+          </div>
+          <div style="font-size:13px;color:var(--muted)">Horas (0–23)</div>
+        </div>
+
+        <div id="heatmapContainer" style="display:flex;flex-direction:column;gap:6px">
+          <!-- Rows injected by JS -->
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Top tweets por interacción</h2>
+        <div id="tweetsList" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+
+      <div class="card">
+        <h2>Métricas descriptivas</h2>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+          <div style="flex:1;min-width:160px;padding:10px;border-radius:8px;background:var(--glass)">
+            <div style="font-size:13px;color:var(--muted)">Media de likes</div>
+            <div style="font-weight:700;font-size:18px" id="avgFavorites">—</div>
+          </div>
+          <div style="flex:1;min-width:160px;padding:10px;border-radius:8px;background:var(--glass)">
+            <div style="font-size:13px;color:var(--muted)">Máximo retweets</div>
+            <div style="font-weight:700;font-size:18px" id="maxRetweets">—</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <footer>
+    Datos del análisis: matriz descriptiva, heatmap horario, matriz de correlación, temas y engagement (JSON de entrada). :contentReference[oaicite:2]{index=2}
+  </footer>
+
+  <script>
+    /* ---------------------------------------------------------------------
+       Aquí se pega el JSON de análisis resultante (extraído del archivo subido).
+       Nota: en implementación real conviene cargarlo desde un endpoint o archivo
+       --------------------------------------------------------------------- */
+    const analysis = {
+      "describe_matrix": {
+        "count":{"favorite_count":1198,"id":1199,"retweet_count":1198,"user.followers_count":1198,"user.friends_count":1198},
+        "mean":{"favorite_count":12.202003338898164,"retweet_count":33.925709515859765,"user.followers_count":5046.368948247078,"user.friends_count":1021.626878130217},
+        "max":{"favorite_count":2733,"retweet_count":28090,"user.followers_count":1997889,"user.friends_count":221536}
+      },
+      "corr_matrix": {
+        "user.followers_count": {"favorite_count":0.3743598815158741, "retweet_count":0.1283469079000893, "user.friends_count":0.5770596319321523},
+        "favorite_count": {"user.followers_count":0.3743598815158741, "retweet_count":0.1210178774154952}
+      },
+      "heatmap": /* heatmap object */ {},
+      "engagement_matrix": {},
+      "topics": {}
+    };
+
+    // Para mantener el ejemplo fiel al JSON real, asignamos las secciones relevantes desde el JSON real
+    // (Los objetos completos han sido incluidos para poblar el dashboard)
+    // WARNING: En producción, cargar JSON externamente y sanitizar.
+    // --- Pegamos aquí los fragmentos reales del archivo --
+    // (Se usan objetos reducidos para evitar inyectar todo en esta parte visual)
+    // Pero en este ejemplo, vamos a extraer directamente del objeto global "analysisFull"
+    const analysisFull = {
+      /* Reemplazar por el JSON completo contenido en el archivo subido.
+         Para la demo copié las secciones principales del JSON real. */
+      "topics": {
+        "topics": [
+          {
+            "title": "Precio y valor percibido",
+            "detail": "Amplia conversación sobre que el producto es 'caro' o 'sobrevalorado' frente a alternativas de barrio/mercado. Otros usuarios justifican el precio por limpieza, servicio y marca.",
+            "challenge": "Reducir la brecha entre precio y valor percibido: clarificar qué incluye el precio, ofrecer opciones y reforzar comunicación."
+          },
+          {
+            "title": "Medios de pago insuficientes",
+            "detail": "Reclamo reiterado por no aceptar tarjetas de crédito/débito y métodos modernos.",
+            "challenge": "Modernizar el ecosistema de cobros (TPV, QR, billeteras)."
+          },
+          {
+            "title": "Calidad y consistencia del producto",
+            "detail": "Opiniones divididas: 'normalito', 'frío', 'seco' vs otros que lo consideran excelente.",
+            "challenge": "Fortalecer estándares de calidad por local/turno."
+          }
+          // ... (otros temas incluidos en el JSON)
+        ],
+        "conclusion": "La conversación evidencia una marca poderosa pero polarizante..."
+      },
+      "heatmap": {
+        "Monday": {"0.0":-1,"1.0":0,"2.0":-1,"3.0":0,"4.0":-1,"5.0":-1,"6.0":-1,"7.0":0,"8.0":-1,"9.0":0,"10.0":-1,"11.0":0,"12.0":-1,"13.0":-1,"14.0":1,"15.0":1,"16.0":3,"17.0":177,"18.0":-1,"19.0":-1,"20.0":-1,"21.0":-1,"22.0":2734,"23.0":82},
+        "Tue
